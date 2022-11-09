@@ -16,17 +16,12 @@ namespace MyBank
             List<BankAccount> BankAccounts = new List<BankAccount>();
             string fileName = "BankAccountData.json";
             await using FileStream createStream = File.Create(fileName);
-            //var options = new JsonSerializerOptions { WriteIndented = true };
-            //----------------------------OVERWRITE YOUR PATH HERE-----------------------------------------
-            string path = @"C:\Users\A8-PC100\Downloads\MyBankSami\MyBank\MyBank\bin\Debug\netcoreapp3.1\";
-            const int MaxLength = 50;
-
             try
             {
                 Console.WriteLine("Create account (1)");
                 Console.WriteLine("Make deposit (2)");
                 Console.WriteLine("Withdraw money (3)");
-                Console.WriteLine("Show all movemente (4)");
+                Console.WriteLine("Show all movements (4)");
                 Console.WriteLine("Exit (0)");
 
 
@@ -45,11 +40,11 @@ namespace MyBank
                             Console.WriteLine("Do you want to make your first deposit?");
                             Console.WriteLine("Yes/No");
                             string option = Console.ReadLine();
-                            var optionToLower = option.ToLower();
+                            string optionToLower = option.ToLower();
                             if (optionToLower.Equals("yes"))
                             {
                                 Console.WriteLine("Please, make your deposit.");
-                                int InitialBalance = Convert.ToInt32(Console.ReadLine());
+                                decimal InitialBalance = Convert.ToInt32(Console.ReadLine());
                                 var UserAccount = new BankAccount(username, InitialBalance);
                                 BankAccounts.Add(UserAccount);
 
@@ -68,18 +63,28 @@ namespace MyBank
 
                         case 2:
                             Console.WriteLine("In which account do you want to deposit?");
-                            string AccountName = Console.ReadLine();
+                            string Deposit_Username = Console.ReadLine();
                             Console.WriteLine("How much cash do you want to deposit?");
                             int cash = Convert.ToInt32(Console.ReadLine());
-                            ifExists(AccountName, BankAccounts);
-                           
-
+                            Console.WriteLine("Do you want to add a note?");
+                            Console.WriteLine("Yes/No");
+                            string AddNote_Deposit = Console.ReadLine();
+                            string AddNoteToLower_Deposit= AddNote_Deposit.ToLower();
+                            DepositInAccount(BankAccounts, Deposit_Username,cash,insertNote(AddNoteToLower_Deposit));
                             break;
 
                         case 3:
-
+                            Console.WriteLine("From which account do you want to withdrawal?");
+                            string WithDrawal_Username = Console.ReadLine();
+                            Console.WriteLine("How much cash do you want to deposit?");
+                            decimal Withdrawal_Balance = Convert.ToInt32(Console.ReadLine());
+                            Console.WriteLine("Do you want to add a note?")
+                            string AddNote_Withdrawal = Console.ReadLine();
+                            string AddNoteToLower_Withdrawal = AddNote_Withdrawal.ToLower();
+                            DepositInAccount(BankAccounts, WithDrawal_Username, Withdrawal_Balance, insertNote(AddNoteToLower_Withdrawal));
                             break;
-
+                        case 4:
+                            break;
                         case 0:
                             check = false;
                             break;
@@ -110,7 +115,7 @@ namespace MyBank
 
         }
 
-        public static string ifExists(string username, List<BankAccount> Accounts)
+        public static string DepositInAccount(List<BankAccount> Accounts, string username, decimal cash, string note)
         {
             bool notValid = true;
             bool exists = false;
@@ -121,7 +126,42 @@ namespace MyBank
                 {
                     if (item.Owner.Equals(username))
                     {
-                        username = item.Owner;
+                       
+                        item.MakeDeposit(cash, DateTime.Now, note);
+                        exists = true;
+                    }
+                    else { exists = false; }
+
+                }
+                if (exists)
+                {
+
+                    Console.WriteLine("Deposit completed succesfully");
+                    notValid = false;
+                }
+                else
+                {
+                    Console.WriteLine("We couldn't find the provided username");
+                    Console.WriteLine("Please, choose another one.");
+                    username = Console.ReadLine();
+                }
+
+               
+            }
+            return username;
+        }
+        public static string WithdrawalFromAccount(List<BankAccount> Accounts, string username, decimal cash, string note)
+        {
+            bool notValid = true;
+            bool exists = false;
+            while (notValid)
+            {
+
+                foreach (var item in Accounts)
+                {
+                    if (item.Owner.Equals(username))
+                    {
+                        item.MakeWithdrawal(cash, DateTime.Now, note);
                         exists = true;
                     }
                     else { exists = false; }
@@ -135,14 +175,14 @@ namespace MyBank
                 }
                 else
                 {
-                    Console.WriteLine("We couldn't find the username provided");
+                    Console.WriteLine("We couldn't find the provided username");
 
                 }
 
-               
+
             }
             return username;
-        } 
+        }
         public static string Validation(string username, List<BankAccount> Accounts)
         {
             bool notValid = true;
@@ -154,7 +194,7 @@ namespace MyBank
                 {
                     if (item.Owner.Equals(username))
                     {
-
+                      
                         repeats = true;
                     }
                     else { repeats = false; }
@@ -185,12 +225,21 @@ namespace MyBank
                 Console.WriteLine($"{item.Owner}  -  {item.Balance}");
             }
         }
-        //public static void (List<BankAccount> Accounts)
-        //{
-        //    foreach (var item in Accounts)
-        //    {
-        //        Console.WriteLine($"{item.Owner}  -  {item.Balance}");
-        //    }
-        //}
+        public static string insertNote(string note)
+        {
+            const int MaxLength = 50;
+            if (note.Equals("yes"))
+            {
+                Console.WriteLine("Please, add your note.");
+                if (note.Length > MaxLength)
+                    note = note.Substring(0, MaxLength);
+            }
+            else
+            {
+                note = "";
+            }
+            return note;
+        }
     }
 }
+  
